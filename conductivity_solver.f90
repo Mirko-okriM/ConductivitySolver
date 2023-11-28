@@ -86,19 +86,19 @@ module GlobalModule
         !kEval=(kP+kNB)/2         !arithmetic
     end function
 	
-	subroutine countZerosInVector(v)
-		real(kind=4*realPrecision), dimension(:) :: v
-		integer :: i, nZeros
-		nZeros=0
-		!$omp parallel do reduction(+:nZeros)
-		do i=1,size(v)
-			if (v(i)==0) then
-				nZeros=nZeros+1
-			end if
-		end do
-		!$omp end parallel do
-		write(*,*) 'nSize: ',size(v), 'nZeros: ', nZeros
-	end subroutine
+    subroutine countZerosInVector(v)
+	real(kind=4*realPrecision), dimension(:) :: v
+	integer :: i, nZeros
+	nZeros=0
+	!$omp parallel do reduction(+:nZeros)
+	do i=1,size(v)
+		if (v(i)==0) then
+			nZeros=nZeros+1
+		end if
+	end do
+	!$omp end parallel do
+	write(*,*) 'nSize: ',size(v), 'nZeros: ', nZeros
+    end subroutine
 
     !functions for the implementation of the conjugate gradient method (ALS SUBROUTINE SCHREIBEN; SODASS DIE BERECHNUNG DIREKT IN DEN... )
     real(kind=4*realPrecision) function dotProduct(v1, v2)
