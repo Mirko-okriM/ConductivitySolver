@@ -14,20 +14,20 @@ module GlobalModule
     implicit none
     !integer, parameter :: chunkSize=100000	!activate if schedule(dynamic, chunkSize) is activated during parallel-looping
     !integer, parameter :: nProcessors=8
-    integer, parameter :: nx = 100  										!Image width
-    integer, parameter :: ny = 100  										!Image height
-    integer, parameter :: nz = 100   										!Image depth
-    integer, parameter :: voxelRes=1 										!VoxelResolution of input-raw data --> SHOULD STAY 1, VALUE DOES NOT REALLY HAVE INFLUENCE ON RESULT, MIGHT BE CHANGED TO TYPE REAL IN FUTURE VERSION
-    integer, parameter :: realPrecision=2 									!floating-point precision: 1 (single) or 2 (double)
-    integer, parameter :: nIteration=10000									!max. number of iterations
-    real(kind=4*realPrecision), parameter :: targetResidual=1e-6						!target residual 	
-    integer(kind=1), parameter :: bitLength = 8  								!Bites per pixel, typically grey-values in raw images are stored as either 8-bit or 16-bit integers
-    integer, dimension(2) :: rawValues=[0,255] 									!bit-grayvalues of each phase (unsigned format)
-    real(kind=4*realPrecision), dimension(2) :: correspConductivity=[0.0001,1.0] 				!conductivity of each phase (only double value, e.g. 1.0)
-    character(512) :: file_path = 'C:\Users\Mirko\Desktop\solver_conductivity\veldsteen_poreus_100cube.raw' 	!input file (veldsteen_poreus_250cube, Berea_2d25um_binary_400cube)
-    character(1) :: evalDirection = 'Z'										!direction of calculation (X or Y or Z)
-    logical :: writeResults=.FALSE.										!write calculated temperature-field (.TRUE. or .FALSE.)
-    character(512) :: output_path ='C:\Users\Mirko\Desktop\solver_conductivity\output.raw'			!name and path of the calculated temperature-field
+    integer, parameter :: nx = 100  																			!Image width
+    integer, parameter :: ny = 100  																			!Image height
+    integer, parameter :: nz = 100   																			!Image depth
+    integer, parameter :: voxelRes=1 																			!VoxelResolution of input-raw data --> SHOULD STAY 1, VALUE DOES NOT REALLY HAVE INFLUENCE ON RESULT, MIGHT BE CHANGED TO TYPE REAL IN FUTURE VERSION
+    integer, parameter :: realPrecision=2 																		!floating-point precision: 1 (single) or 2 (double)
+    integer, parameter :: nIteration=10000																		!max. number of iterations
+    real(kind=4*realPrecision), parameter :: targetResidual=1e-6												!target residual 	
+    integer(kind=1), parameter :: bitLength = 8  																!Bites per pixel, typically grey-values in raw images are stored as either 8-bit or 16-bit integers
+    integer, dimension(2) :: rawValues=[0,255] 																	!bit-grayvalues of each phase (unsigned format)
+    real(kind=4*realPrecision), dimension(2) :: correspConductivity=[0.0001,1.0] 								!conductivity of each phase (only double value, e.g. 1.0)
+    character(512) :: file_path = 'C:\Users\Mirko\Desktop\solver_conductivity\veldsteen_poreus_100cube.raw' 	!input file
+    character(1) :: evalDirection = 'Z'																			!direction of calculation (X or Y or Z)
+    logical :: writeResults=.FALSE.																				!write calculated temperature-field (.TRUE. or .FALSE.)
+    character(512) :: output_path ='C:\Users\Mirko\Desktop\solver_conductivity\output.raw'						!name and path of the calculated temperature-field
     integer, parameter :: dx=voxelRes
     integer, parameter :: dy=voxelRes
     integer, parameter :: dz=voxelRes
@@ -541,7 +541,6 @@ program hello
 		i=i+1
 	end do	
 	write(*,*) '... done'
-
 	
 	write(*,*) 'Final result:'
 	if (evalDirection=='X') then
