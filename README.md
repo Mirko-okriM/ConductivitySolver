@@ -1,4 +1,4 @@
 24.01.24: 
-- ConductivitySolver v1.1 released
+- release: ConductivitySolver v1.1
 - preprocessing tutorial video: https://youtu.be/RUQssngar3Y
 - postprocessing tutorial video: https://youtu.be/coOlP0cAj5g
