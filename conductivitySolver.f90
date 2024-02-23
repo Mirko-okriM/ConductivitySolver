@@ -36,7 +36,7 @@ program conductivitySolver
     integer(kind=bitLength/8), allocatable :: currSample(:)
     
     integer :: x, y, z, i, j, currCell
-    integer, parameter :: nCells=nx*ny*nz
+    integer(kind=16), parameter :: nCells=nx*ny*nz
     integer, parameter :: posODp1=1                 !cellPos(3,2,2)-cellPos(2,2,2)
     integer, parameter :: posODm1=-1                !cellPos(1,2,2)-cellPos(2,2,2)
     integer, parameter :: posODp2=nx                !cellPos(2,3,2)-cellPos(2,2,2)
@@ -62,7 +62,7 @@ program conductivitySolver
     write(pathTemperature,"(2A)") TRIM(casePath), TRIM('resTemp.raw')
     write(pathFlux,"(2A)") TRIM(casePath), TRIM('resFlux.raw')
     write(pathPost,"(2A)") TRIM(casePath), TRIM('loadData_paraview.xdmf')
-    write(pathResult,"(2A)") TRIM(casePath), TRIM('conductivity.csv')
+    write(pathResult,"(5A)") TRIM(casePath), TRIM(sampleName), TRIM('_conductivity_'), TRIM(evalDirection), TRIM('.csv')
 
 
     !openmp might not work if giant arrays are not defined as allocatable variables
