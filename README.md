@@ -1,3 +1,32 @@
+# Thermal Conductivity Solver (DRP) v2.0.0
+
+A high-performance numerical solver for the heat equation in porous media and digital rock physics (DRP).
+
+---
+
+## 📢 New Major Release: Version 2.0.0
+
+This version represents a significant overhaul of the solver's architecture, moving from 1D-boundary constraints to full tensor support and arbitrary geometry handling.
+
+### 🚀 Key Features & Changes
+
+#### 1. Full Thermal Conductivity Tensor
+* **Periodic Boundary Conditions (PBC):** Implementation of PBCs in all spatial directions.
+* **Full Tensor Support:** Unlike previous versions limited to Dirichlet/Neumann conditions, v2.0.0 can now compute the **complete effective thermal conductivity tensor** $\lambda_{eff}$.
+* Improved accuracy for anisotropic rock samples and complex pore networks.
+
+#### 2. Arbitrary Geometries (Backward Search)
+* **Beyond Cubic Domains:** Support for non-cuboid geometries (e.g., spheres, irregular rock fragments, or disconnected clusters).
+* **Backward Search Logic:** A newly implemented routine ensures that the solver correctly identifies domain boundaries in non-standard geometries.
+* *Reference:* This methodology is based on the research presented in [Insert Your Paper Name Here].
+
+#### 3. Solver Optimization & CSR Migration
+To accommodate the complexity of periodic boundaries and larger datasets, the internal matrix logic has been refactored:
+* **CSR Matrix Format:** Transitioned from diagonal vector storage to **Compressed Sparse Row (CSR)** format for the system matrix.
+* **Refactored Linear Algebra:** All core functions for matrix-vector multiplication and algebra have been optimized for the CSR format.
+* **Memory Efficiency:** Significant reduction in memory overhead for sparse systems.
+
+----------------------------------------------------------------------------------------------------------------------------------
 Version 1.1 (24.01.24):
   - code is organized in seperate files 
   - added flux field computation for postprocessing 
