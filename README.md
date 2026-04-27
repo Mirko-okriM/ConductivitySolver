@@ -1,10 +1,10 @@
-# Thermal Conductivity Solver (DRP) v2.0.0
+# Thermal Conductivity Solver (DRP) v1.2
 
 A high-performance numerical solver for the heat equation in porous media and digital rock physics (DRP).
 
 ---
 
-## 📢 New Major Release: Version 2.0.0
+## 📢 New Major Release: Version 1.2
 
 This version represents a significant overhaul of the solver's architecture, moving from 1D-boundary constraints to full tensor support and arbitrary geometry handling.
 
