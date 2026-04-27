@@ -1,4 +1,5 @@
 Conductivity Solver v1.2 (27.4.26)
+
 A numerical solver for the calculation of thermal and electrical conductivity in heterogenous media.
 Full tensor support and arbitrary geometry handling.
 
