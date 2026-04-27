@@ -20,7 +20,7 @@ To accommodate the complexity of periodic boundaries and larger datasets, the in
 * Refactored Linear Algebra: All core functions for matrix-vector multiplication and algebra have been optimized for the CSR format.
 
 ----------------------------------------------------------------------------------------------------------------------------------
-Version 1.1 (24.01.24):
+**Conductivity Solver v1.1 (24.01.24):
   - code is organized in seperate files 
   - added flux field computation for postprocessing 
   - added automated paraview load file for postprocessing 
