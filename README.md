@@ -11,7 +11,7 @@ Features
 2. Arbitrary Geometries
 * Beyond Cubic Domains: Support for non-cuboid geometries (e.g., spheres, irregular rock cuttings).
 * Backward and Forward Search: A newly implemented routine ensures that the solver correctly identifies domain boundaries in non-standard geometries.
-* *Reference:* This methodology is based on the research presented in [Insert Your Paper Name Here].
+* *Reference:* This methodology is based on the research presented in [xxxxxxx].
 
 3. Solver Optimization & CSR Migration: To accommodate the complexity of periodic boundaries and larger datasets, the internal matrix logic has been refactored
 * CSR Matrix Format: Transitioned from diagonal vector storage to Compressed Sparse Row (CSR) format for the system matrix.
