@@ -6,8 +6,8 @@ Full tensor support and arbitrary geometry handling.
 Features
 1. Full Thermal Conductivity Tensor
 * Periodic Boundary Conditions (PBC): Implementation of PBCs in all spatial directions.
-* Full Tensor Support: Unlike previous versions limited to Dirichlet/Neumann conditions, v1.2 can now compute the **complete effective thermal conductivity tensor** $\lambda_{eff}$.
-* Improved accuracy for anisotropic rock samples and complex pore networks.
+* Full Tensor Support: Unlike previous versions limited to Dirichlet/Neumann conditions, v1.2 can now compute the complete effective conductivity tensor $\lambda_{eff}$.
+* Support for arbitrary geometry.
 
 2. Arbitrary Geometries
 * Beyond Cubic Domains: Support for non-cuboid geometries (e.g., spheres, irregular rock cuttings).
