@@ -14,6 +14,11 @@
 !       - added flux field computation for postprocessing 
 !       - added automated paraview load file for postprocessing 
 !       - adjustments for user-friendliness 
+!   Version 1.2 (24.08.25): 
+!       - periodic boundary condtions are added
+!       - solver computes conductivity tensor
+!   Version 1.3 (29.08.25): 
+!       - CSR matrix format added
 !
 
 !-------------------------------------------------------------------------------------
@@ -35,27 +40,38 @@ program conductivitySolver
     integer, parameter :: dz=voxelRes
     integer(kind=bitLength/8), allocatable :: currSample(:)
     
-    integer :: x, y, z, i, j, currCell
-    integer(kind=16), parameter :: nCells=nx*ny*nz
-    integer, parameter :: posODp1=1                 !cellPos(3,2,2)-cellPos(2,2,2)
-    integer, parameter :: posODm1=-1                !cellPos(1,2,2)-cellPos(2,2,2)
-    integer, parameter :: posODp2=nx                !cellPos(2,3,2)-cellPos(2,2,2)
-    integer, parameter :: posODm2=-nx               !cellPos(2,1,2)-cellPos(2,2,2)
-    integer, parameter :: posODp3=nx*ny             !cellPos(2,2,3)-cellPos(2,2,2)
-    integer, parameter :: posODm3=-nx*ny            !cellPos(2,2,1)-cellPos(2,2,2)
-    real(kind=4*realPrecision), allocatable :: MD(:), b(:), ODp1(:), ODp2(:), ODp3(:)!, ODm1(:), ODm2(:), ODm3(:) not necessary since Matrix is symmetric
-    real(kind=4*realPrecision) :: kF, kB, kE, kW, kN, kS
-    real(kind=4*realPrecision) :: aP, aF, aB, aE, aW, aN, aS, bCell
-    real(kind=4*realPrecision) :: T_P, T_F, T_B, T_E, T_W, T_N, T_S
+    integer(kind=4) :: x, y, z, i, j, currCell, nCounter
+    integer(kind=4), parameter :: nCells=nx*ny*nz !this is also equal to the number of elements on the main diagonal
+    integer(kind=4), allocatable :: colInd(:), rowPtr(:) !arrays for CSR-Format
+    integer(kind=4) :: rowPtrEntry
+    real(kind=4*realPrecision), allocatable :: A_mat(:), MD(:) !array for CSR-Format     
+    !logical :: frontPeriodicBC, backPeriodicBC, eastPeriodicBC, westPeriodicBC, northPeriodicBC, southPeriodicBC !****    
+    real(kind=4*realPrecision) :: kF, kB, kE, kW, kN, kS, kP
+    real(kind=4*realPrecision) :: aP, aF, aB, aE, aW, aN, aS
+    real(kind=4*realPrecision) :: phiP, phiF, phiB, phiE, phiW, phiN, phiS
     real(kind=4*realPrecision) :: currResidual
+    real(kind=4*realPrecision) :: xAve, qAveX, qAveY, qAveZ !****
+    integer(kind=1) :: Gx, Gy, Gz !****
     real(kind=4*realPrecision) :: totalFluxFront, totalFluxBack, totalFluxEast, totalFluxWest, totalFluxNorth, totalFluxSouth
     real(kind=4*realPrecision) :: aveFluxX, aveFluxY, aveFluxZ, kEffX, kEffY, kEffZ
-    integer(kind=1) BC_F, BC_B, BC_E, BC_W, BC_N, BC_S
-    character(8) :: patchTypeFront, patchTypeBack, patchTypeEast, patchTypeWest, patchTypeNorth, patchTypeSouth
-    real(kind=4*realPrecision), allocatable :: r(:), p(:), xField(:), Apk(:), zVec(:) !variables for conjugate gradient method
+    real(kind=4*realPrecision), allocatable :: b(:), r(:), p(:), xField(:), Apk(:), zVec(:) !variables for conjugate gradient method
     real(kind=4*realPrecision) :: alpha, beta, rDotProductOld, residualFactor
     real(kind=4*realPrecision), allocatable :: qFlux(:) !variables for flux calculation (postprocessing)
+    integer(kind=4), allocatable :: rockVoxelCellNumber(:) !assign a chronologically sorted "cell number" to the rock cells
+    integer,parameter :: lengthSortArray=7 !every cell connects at maximum 1(self)+6(faces)=7 cells, self-looping cells have less connections
+    integer(kind=4) :: arrayCellNeighbourNumber(lengthSortArray) !auxiloary array to sort values for matrix composition
+    real(kind=4*realPrecision) :: arrayCellNeighbourCoeff(lengthSortArray) !auxiloary array to sort values for matrix composition
+    
     integer :: arrayPos
+    integer :: currRockCell
+    integer :: nCellsRock
+    integer :: outputInfoCounter
+    integer,parameter :: voidCellValue=0
+    integer,parameter :: emptyArrayValue=0
+    
+    integer :: xSearchFront, xSearchBack, ySearchEast, ySearchWest, zSearchNorth, zSearchSouth
+    integer :: xSearchFrontOld, xSearchBackOld, ySearchEastOld, ySearchWestOld, zSearchNorthOld, zSearchSouthOld
+
     
     !initialize path variables
     write(rawDataPath,"(2A)") TRIM(casePath), TRIM(sampleName)
@@ -64,52 +80,12 @@ program conductivitySolver
     write(pathPost,"(2A)") TRIM(casePath), TRIM('loadData_paraview.xdmf')
     write(pathResult,"(5A)") TRIM(casePath), TRIM(sampleName), TRIM('_conductivity_'), TRIM(evalDirection), TRIM('.csv')
 
-
     !openmp might not work if giant arrays are not defined as allocatable variables
     allocate(currSample(nCells))
-    allocate(MD(nCells))
-    allocate(b(nCells))
-    allocate(ODp1(nCells-posODp1))
-    allocate(ODp2(nCells-posODp2))
-    allocate(ODp3(nCells-posODp3))
-    allocate(r(nCells))
-    allocate(p(nCells))
-    allocate(xField(nCells))
-    allocate(Apk(nCells))
-    allocate(zVec(nCells))
-
-    !call omp_set_num_threads(nProcessors)
-
-    !initialize variables for conjugate gradient method
-    Apk=0.0
-    r=0.0
-    p=0.0
-    xField=0.0
-
-    !Setup boundary logic
-    patchTypeFront='wall'   !x+
-    patchTypeBack='wall'    !x-
-    patchTypeEast='wall'    !y+
-    patchTypeWest='wall'    !y-
-    patchTypeNorth='wall'   !z+
-    patchTypeSouth='wall'   !z-
-    if (evalDirection=='Z') then
-        patchTypeNorth='patch'  !z+
-        patchTypeSouth='patch'  !z-
-    elseif (evalDirection=='X') then
-        patchTypeFront='patch'  !x+
-        patchTypeBack='patch'   !x-
-    elseif (evalDirection=='Y') then
-        patchTypeEast='patch'   !y+
-        patchTypeWest='patch'   !y-
-    endif
-    BC_F=0  !fixed front bc value if face is 'patch', if value is changed, than fluxCalculation might not be correct anymore
-    BC_B=1  !fixed back bc value if face is 'patch', if value is changed, than fluxCalculation might not be correct anymore
-    BC_E=0  !fixed east bc value if face is 'patch', if value is changed, than fluxCalculation might not be correct anymore
-    BC_W=1  !fixed west bc value if face is 'patch', if value is changed, than fluxCalculation might not be correct anymore
-    BC_N=0  !fixed north bc value if face is 'patch', if value is changed, than fluxCalculation might not be correct anymore
-    BC_S=1  !fixed south bc value if face is 'patch', if value is changed, than fluxCalculation might not be correct anymore
-
+    allocate(rockVoxelCellNumber(nCells))
+    
+    !call omp_set_num_threads(nProcessors)        
+    
     ! Open the file for binary reading
     write(*,*) '1) Reading raw-data ...'
     open(10, file=rawDataPath, form='unformatted', access='stream', status='old')
@@ -124,29 +100,34 @@ program conductivitySolver
         rawValues(i)=unsignedToSigned(rawValues(i))
         write(*,*) 'Wert ',i,': ',rawValues(i)
     end do
-
+    
     !determination of matrix elements for each cell
-    write(*,*) '2) Setting up linear system ...'
-    include './src/buildLinearSystem.f90'
+    write(*,*) '2) Setting up linear system ...'    
+    if (searchDirection=='forwardSearch') then
+        include './src/buildLinearSystem_forwardSearch.f90'
+    else if (searchDirection=='backwardSearch') then   
+        include './src/buildLinearSystem_backwardSearch.f90' 
+    end if        
     write(*,*) '... done'
     
     !preconditioned conjugate gradient with Jacobi-Diagonal-Preconditioner
     write(*,*) '3) Solving linear system ...'    
     include './src/conjugateGradient.f90'    
     write(*,*) '... done'
+    write(*,*) ''
     
     write(*,*) 'Final result:'
     open(1, file=pathResult, access='stream', status='replace', form='formatted')
     write(1,*) 'Iteration ', i,' residual (L1-Norm): ', currResidual
     if (evalDirection=='X') then
-        write(*,*) 'totalFluxFront= ', totalFluxFront, ', totalFluxBack= ', totalFluxBack, ', kEffX= ', kEffX        
-        write(1,*) 'totalFluxFront= ', totalFluxFront, ', totalFluxBack= ', totalFluxBack, ', kEffX= ', kEffX
+        write(*,*) 'k_xx= ', qAveX, new_line('a'), ' k_yx= ', qAveY, new_line('a'), ' k_zx= ', qAveZ        
+        write(1,*) 'k_xx= ', qAveX, new_line('a'), ' k_yx= ', qAveY, new_line('a'), ' k_zx= ', qAveZ 
     else if (evalDirection=='Y') then
-        write(*,*) 'totalFluxEast= ', totalFluxEast, ', totalFluxWest= ', totalFluxWest, ', kEffY= ', kEffY
-        write(1,*) 'totalFluxEast= ', totalFluxEast, ', totalFluxWest= ', totalFluxWest, ', kEffY= ', kEffY
+        write(*,*) 'k_xy= ', qAveX, new_line('a'), ' k_yy= ', qAveY, new_line('a'), ' k_zy= ', qAveZ
+        write(1,*) 'k_xy= ', qAveX, new_line('a'), ' k_yy= ', qAveY, new_line('a'), ' k_zy= ', qAveZ
     else if (evalDirection=='Z') then
-        write(*,*) 'totalFluxNorth= ', totalFluxNorth, ', totalFluxSouth= ', totalFluxSouth, ', kEffZ= ', kEffZ
-        write(1,*) 'totalFluxNorth= ', totalFluxNorth, ', totalFluxSouth= ', totalFluxSouth, ', kEffZ= ', kEffZ
+        write(*,*) 'k_xz= ', qAveX, new_line('a'), ' k_yz= ', qAveY, new_line('a'), ' k_zz= ', qAveZ
+        write(1,*) 'k_xz= ', qAveX, new_line('a'), ' k_yz= ', qAveY, new_line('a'), ' k_zz= ', qAveZ
     end if
     close(1)
 
@@ -162,7 +143,11 @@ program conductivitySolver
     
     if (writeFluxField) then
         write(*,*) 'Writing flux field ...'         
-        include './src/fluxCalculation.f90'
+        if (searchDirection=='forwardSearch') then
+            include './src/fluxCalculation_forwardSearch.f90' 
+        else if (searchDirection=='backwardSearch') then   
+            include './src/fluxCalculation_backwardSearch.f90' 
+        end if  
         open(1, file=pathFlux, access='stream', status='replace', form='unformatted')
         write(1) real(qFlux,4)
         close(1)
@@ -175,7 +160,7 @@ program conductivitySolver
     close(1)
 
     !write(*,*) "Press Enter to exit..."
-    !read(*,*)
+    !read(*,*) 
     
     contains
     include './src/mainFunctions.f90'
