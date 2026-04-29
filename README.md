@@ -13,8 +13,7 @@ Features
 * Backward and Forward Search: A newly implemented routine ensures that the solver correctly identifies domain boundaries in non-standard geometries.
 * *Reference:* This methodology is based on the research presented in [Insert Your Paper Name Here].
 
-3. Solver Optimization & CSR Migration
-To accommodate the complexity of periodic boundaries and larger datasets, the internal matrix logic has been refactored:
+3. Solver Optimization & CSR Migration: To accommodate the complexity of periodic boundaries and larger datasets, the internal matrix logic has been refactored
 * CSR Matrix Format: Transitioned from diagonal vector storage to **Compressed Sparse Row (CSR)** format for the system matrix.
 * Refactored Linear Algebra: All core functions for matrix-vector multiplication and algebra have been optimized for the CSR format.
 
