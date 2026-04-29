@@ -48,6 +48,27 @@
         !kEval=(kP+kNB)/2         !arithmetic
     end function
     
+    ! integer(kind=4) function rowPtr(currRow) !since all rows have 7 elements, rowPtr can be calculated on the fly and memory is saved
+        ! integer (kind=4) :: currRow
+        ! rowPtr=7*(currRow-1)+1
+    ! end function
+    
+    subroutine bubbleSort(keys, vals) !bubble sort for two arrays, the keys array is sorted and the position of the vals-elements is set accordingly
+        integer, intent(inout) :: keys(:)
+        real(kind=4*realPrecision), intent(inout) :: vals(:)
+        integer :: i, j, n, tk
+        real(kind=4*realPrecision) :: tv
+        n = size(keys)
+        do i = 1, n-1
+            do j = 1, n-i
+                if (keys(j) > keys(j+1)) then
+                    tk = keys(j); keys(j) = keys(j+1); keys(j+1) = tk
+                    tv = vals(j); vals(j) = vals(j+1); vals(j+1) = tv
+                end if
+            end do
+        end do
+    end subroutine
+    
     subroutine countZerosInVector(v)
         real(kind=4*realPrecision), dimension(:) :: v
         integer :: i, nZeros
@@ -84,64 +105,25 @@
         !$omp end parallel do
     end subroutine JacobiDiagonalPreconditioner
     
-    subroutine JacobiPreconditioner(MD, OD1, OD2, OD3, b, zOld, posOD1, posOD2, posOD3, zVec) !only valid for symmetric heptadiagonal matrices
-        real(kind=4*realPrecision), dimension(:) :: MD, OD1, OD2, OD3, b, zOld, zVec
-        integer :: posOD1, posOD2, posOD3, i
-        integer, parameter :: nCells=nx*ny*nz
-        !$omp parallel do !schedule(dynamic, chunkSize)
-            do i=1,nx*ny*nz !logic might be enhanced with less if statements, but maybe code readability might suffer
-                zVec(i)=b(i)
-                if (i<=nCells-posOD1) then               !first positiv offdiagonal is active
-                    zVec(i)=zVec(i)-OD1(i)*zOld(i+posOD1)
-                end if
-                if (i<=nCells-posOD2) then               !second positiv offdiagonal is active
-                    zVec(i)=zVec(i)-OD2(i)*zOld(i+posOD2)
-                end if
-                if (i<=nCells-posOD3) then               !third positiv offdiagonal is active
-                    zVec(i)=zVec(i)-OD3(i)*zOld(i+posOD3)
-                end if
-                if (posOD1<i) then                       !first negativ offdiagonal is active
-                    zVec(i)=zVec(i)-OD1(i-posOD1)*zOld(i-posOD1)
-                end if
-                if (posOD2<i) then                       !second negativ offdiagonal is active
-                    zVec(i)=zVec(i)-OD2(i-posOD2)*zOld(i-posOD2)
-                end if
-                if (posOD3<i) then                       !third negativ offdiagonal is active
-                    zVec(i)=zVec(i)-OD3(i-posOD3)*zOld(i-posOD3)
-                end if
-                zVec(i)=zVec(i)/MD(i)
+    subroutine CSRMatrixTimesVector(A_mat, colInd, rowPtr, vIn, resVec, nCells)
+        real(kind=4*realPrecision), dimension(:) :: A_mat,  vIn, resVec
+        integer(kind=4), dimension(:) :: colInd, rowPtr
+        integer :: i, nCells, currRow
+        real(kind=4*realPrecision) :: sum_tmp
+        resVec=0.0d0
+        !$omp parallel do default(shared) private(sum_tmp) !schedule(dynamic, chunkSize)
+            do currRow=1,nCells
+            sum_tmp = 0.0d0
+            !$omp simd reduction(+:sum_tmp) 
+            !according to chatgpt "simd reduction(+:sum)" improves chache management and 
+            !calculation is performed in one step (using vectorregisters to speed up calculation)
+                do i=rowPtr(currRow),rowPtr(currRow+1)-1
+                    sum_tmp=sum_tmp+A_mat(i)*vIn(colInd(i))
+                end do
+                resVec(currRow)=sum_tmp
             end do
         !$omp end parallel do
-    end subroutine      
-
-    subroutine symHeptaMatrixTimesVector(MD, OD1, OD2, OD3, v, posOD1, posOD2, posOD3, resVec) !only valid for symmetric heptadiagonal matrices
-        real(kind=4*realPrecision), dimension(:) :: MD, OD1, OD2, OD3, v, resVec
-        integer :: posOD1, posOD2, posOD3, i
-        integer, parameter :: nCells=nx*ny*nz
-        !$omp parallel do !schedule(dynamic, chunkSize)
-            do i=1,nx*ny*nz !logic might be enhanced with less if statements, but maybe code readability might suffer
-                resVec(i)=MD(i)*v(i)
-                if (i<=nCells-posOD1) then               !first positiv offdiagonal is active
-                    resVec(i)=resVec(i)+OD1(i)*v(i+posOD1)
-                end if
-                if (i<=nCells-posOD2) then               !second positiv offdiagonal is active
-                    resVec(i)=resVec(i)+OD2(i)*v(i+posOD2)
-                end if
-                if (i<=nCells-posOD3) then               !third positiv offdiagonal is active
-                    resVec(i)=resVec(i)+OD3(i)*v(i+posOD3)
-                end if
-                if (posOD1<i) then                       !first negativ offdiagonal is active
-                    resVec(i)=resVec(i)+OD1(i-posOD1)*v(i-posOD1)
-                end if
-                if (posOD2<i) then                       !second negativ offdiagonal is active
-                    resVec(i)=resVec(i)+OD2(i-posOD2)*v(i-posOD2)
-                end if
-                if (posOD3<i) then                       !third negativ offdiagonal is active
-                    resVec(i)=resVec(i)+OD3(i-posOD3)*v(i-posOD3)
-                end if
-            end do
-        !$omp end parallel do
-    end subroutine symHeptaMatrixTimesVector
+    end subroutine CSRMatrixTimesVector
 
     subroutine vectorPlusScalarTimesVector(v1, s, v2, resVec)
         real(kind=4*realPrecision), dimension(:) :: v1, v2, resVec
@@ -164,6 +146,28 @@
             end do
         !$omp end parallel do
     end function
+    
+    real(kind=4*realPrecision) function sumOfComponents(v1)
+        real(kind=4*realPrecision), dimension(:) :: v1
+        integer :: i
+        sumOfComponents=0
+        !$omp parallel do reduction(+:sumOfComponents) !schedule(dynamic, chunkSize)
+            do i=1,size(v1)
+                sumOfComponents=sumOfComponents+v1(i)
+            end do
+        !$omp end parallel do
+    end function
+    
+    subroutine forceAveZeroFieldConstraint(vecIn, s, resVec)
+        real(kind=4*realPrecision), dimension(:) :: vecIn, resVec
+        real(kind=4*realPrecision) :: s
+        integer :: i
+        !$omp parallel do !schedule(dynamic, chunkSize)
+            do i=1,size(vecIn)
+                resVec(i)=vecIn(i)-s
+            end do
+        !$omp end parallel do
+    end subroutine forceAveZeroFieldConstraint
 
     !functions for postprocessing (determination of heatFlux)
     real(kind=4*realPrecision) function calcFluxX(xTarget,BC,xField)
