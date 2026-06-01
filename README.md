@@ -54,5 +54,6 @@ Follow these steps to set up and run your simulation:
 ```
 
 ## Videotutorial
-[![Link](https://img.youtube.com/vi/B3DSIfbunaA/maxresdefault.jpg)](https://www.youtube.com/watch?v=B3DSIfbunaA)
+Click the image below to watch the tutorial on YouTube (opens in a new tab):
+[![Link](https://img.youtube.com/vi/B3DSIfbunaA/mqdefault.jpg)](https://www.youtube.com/watch?v=B3DSIfbunaA)
 
