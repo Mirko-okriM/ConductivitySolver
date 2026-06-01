@@ -3,7 +3,7 @@
 ## Tutorial
 **Prerequisite:** You will need a **Fortran compiler** (e.g., `gfortran`) to run this tool.
 
-Follow these simple steps to set up and run your simulation:
+Follow these steps to set up and run your simulation:
 
 1. **Download:** Download all files from this repository and place them together in a single directory.
 2. **Configure:** Open the `settings.f90` file in a text editor, adjust the parameters for your specific case, and save the file.
