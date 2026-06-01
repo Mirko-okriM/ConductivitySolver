@@ -7,8 +7,8 @@
 
 Follow these simple steps to set up and run your simulation:
 
-1. **Download Files:** Download all files from this repository and place them together in a single directory.
-2. **Configure Settings:** Open the `settings.f90` file in a text editor, adjust the parameters for your specific case, and save the file.
+1. **Download:** Download all files from this repository and place them together in a single directory.
+2. **Configure:** Open the `settings.f90` file in a text editor, adjust the parameters for your specific case, and save the file.
 3. **Compile:** Open your terminal in the case directory and compile the code using the following command:
 ```bash
    gfortran -fopenmp -O3 conductivitySolver.f90 -o solverRun
