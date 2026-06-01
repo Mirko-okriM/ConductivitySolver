@@ -1,8 +1,6 @@
 * [Changelog and Features](#Changelog-and-Features)
 * [Tutorial](#Tutorial)
 ## Tutorial
-## Mini-Tutorial: Setting Up a Case
-
 **Prerequisite:** You will need a **Fortran compiler** (e.g., `gfortran`) to run this tool.
 
 Follow these simple steps to set up and run your simulation:
