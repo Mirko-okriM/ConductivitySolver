@@ -1,7 +1,7 @@
 * [Changelog and Features](#Changelog-and-Features)
 * [Tutorial](#Tutorial)
 ## Tutorial
-**Prerequisite:** You will need a **Fortran compiler** (e.g., `gfortran`) to run this tool.
+**Prerequisite:** You will need a **Fortran compiler** (e.g., `gfortran`) to run this tool. This guide is written for **Linux systems**, similar steps apply to **Windows machines**.
 
 Follow these steps to set up and run your simulation:
 
