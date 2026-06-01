@@ -2,7 +2,7 @@
 * [Tutorial](#Tutorial)
 ## Tutorial
 
-##Changelog and Features
+## Changelog and Features
 **Conductivity Solver v1.2 (27.4.26)**
 
 A numerical solver for the calculation of thermal and electrical conductivity in heterogenous media.
