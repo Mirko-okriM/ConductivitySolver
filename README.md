@@ -11,7 +11,15 @@ Follow these simple steps to set up and run your simulation:
 2. **Configure Settings:** Open the `settings.f90` file in a text editor, adjust the parameters for your specific case, and save the file.
 3. **Compile:** Open your terminal in the case directory and compile the code using the following command:
 ```bash
-   [INSERT YOUR COMPILATION COMMAND HERE, e.g., gfortran -o solver main.f90 settings.f90]
+   gfortran -fopenmp -O3 conductivitySolver.f90 -o solverRun
+```
+4. **Set Number of CPUs:** Define the number of CPU cores you want to use for the parallel computation (e.g. nCPU=8):
+```bash
+   export OMP_NUM_THREADS=8
+```
+5. **Run:**  Execute the compiled program to start the simulation:
+```bash
+   ./solverRun
 ```
 
 ## Changelog and Features
