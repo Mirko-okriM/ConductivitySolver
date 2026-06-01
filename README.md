@@ -11,7 +11,7 @@ Follow these steps to set up and run your simulation:
 ```bash
    gfortran -fopenmp -O3 conductivitySolver.f90 -o solverRun
 ```
-4. **Set Number of CPUs:** Define the number of CPU cores you want to use for the parallel computation (e.g. nCPU=8):
+4. **Set Number of CPUs:** Define the number of CPU cores you want to use for parallel computations (e.g. nCPU=8):
 ```bash
    export OMP_NUM_THREADS=8
 ```
