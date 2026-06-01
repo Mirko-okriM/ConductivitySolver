@@ -12,7 +12,7 @@ Follow these simple steps to set up and run your simulation:
 3. **Compile:** Open your terminal in the case directory and compile the code using the following command:
 ```bash
    [INSERT YOUR COMPILATION COMMAND HERE, e.g., gfortran -o solver main.f90 settings.f90]
-'''
+```
 
 ## Changelog and Features
 **Conductivity Solver v1.2 (27.4.26)**
