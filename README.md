@@ -1,32 +1,6 @@
+* [Changelog and Features](#Changelog-and-Features)
 * [Tutorial](#Tutorial)
 * [Videotutorial](#Videotutorial)
-* [Changelog and Features](#Changelog-and-Features)
-
-
-## Tutorial
-**Prerequisite:** You will need a **Fortran compiler** (e.g., `gfortran`) to run this tool. This guide is written for **Linux systems**, similar steps apply to **Windows machines**.
-
-Follow these steps to set up and run your simulation:
-
-1. **Download:** Download all files from this repository and place them together in a directory.
-2. **Configure:** Open the `settings.f90` file in a text editor, adjust the parameters for your specific case, and save the file.
-3. **Compile:** Open your terminal in the case directory and compile the code using the following command:
-```bash
-   gfortran -fopenmp -O3 conductivitySolver.f90 -o solverRun
-```
-4. **Set Number of CPUs:** Define the number of CPU cores you want to use for parallel computations (e.g. nCPU=8):
-```bash
-   export OMP_NUM_THREADS=8
-```
-5. **Run:**  Execute the compiled program to start the simulation:
-```bash
-   ./solverRun
-```
-
-## Videotutorial
-[![Link](https://img.youtube.com/vi/B3DSIfbunaA/maxresdefault.jpg)](https://www.youtube.com/watch?v=B3DSIfbunaA)
-
-
 
 ## Changelog and Features
 **Conductivity Solver v1.2 (27.4.26)**
@@ -58,3 +32,27 @@ Features
   
 - preprocessing tutorial video: https://youtu.be/RUQssngar3Y
 - postprocessing tutorial video: https://youtu.be/coOlP0cAj5g
+
+## Tutorial
+**Prerequisite:** You will need a **Fortran compiler** (e.g., `gfortran`) to run this tool. This guide is written for **Linux systems**, similar steps apply to **Windows machines**.
+
+Follow these steps to set up and run your simulation:
+
+1. **Download:** Download all files from this repository and place them together in a directory.
+2. **Configure:** Open the `settings.f90` file in a text editor, adjust the parameters for your specific case, and save the file.
+3. **Compile:** Open your terminal in the case directory and compile the code using the following command:
+```bash
+   gfortran -fopenmp -O3 conductivitySolver.f90 -o solverRun
+```
+4. **Set Number of CPUs:** Define the number of CPU cores you want to use for parallel computations (e.g. nCPU=8):
+```bash
+   export OMP_NUM_THREADS=8
+```
+5. **Run:**  Execute the compiled program to start the simulation:
+```bash
+   ./solverRun
+```
+
+## Videotutorial
+[![Link](https://img.youtube.com/vi/B3DSIfbunaA/maxresdefault.jpg)](https://www.youtube.com/watch?v=B3DSIfbunaA)
+
