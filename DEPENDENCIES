@@ -1,2 +1,2 @@
 The software has been intentionally designed to run without external dependencies or third-party libraries. 
-No additional software packages are required beyond a standard installation of the programming environment.
+No additional software packages are required beyond a standard installation of a Fortran compiler.
